@@ -1,3 +1,4 @@
+#[allow(dead_code)]
 /// Constants about traps.
 pub mod traps {
     /// Constants about interrupt.

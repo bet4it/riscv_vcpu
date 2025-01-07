@@ -128,8 +128,8 @@ impl<H: AxVCpuHal> axvcpu::AxArchVCpu for RISCVVCpu<H> {
     /// Set one of the vCPU's general purpose register.
     fn set_gpr(&mut self, index: usize, val: usize) {
         match index {
-            0..=7 => {
-                self.set_gpr_from_gpr_index(GprIndex::from_raw(index as u32 + 10).unwrap(), val);
+            0..=31 => {
+                self.set_gpr_from_gpr_index(GprIndex::from_raw(index as u32).unwrap(), val);
             }
             _ => {
                 warn!(
@@ -138,6 +138,30 @@ impl<H: AxVCpuHal> axvcpu::AxArchVCpu for RISCVVCpu<H> {
                 );
             }
         }
+    }
+
+    /// Get one of the vCPU's general purpose register.
+    fn get_gpr(&self, index: usize) -> usize {
+        match index {
+            0..=31 => self.regs.guest_regs.gprs.reg(GprIndex::from_raw(index as u32).unwrap()),
+            _ => {
+                warn!(
+                    "RISCVVCpu: Unsupported general purpose register index: {}",
+                    index
+                );
+                0
+            }
+        }
+    }
+
+    /// Get the value of the program counter (PC).
+    fn get_pc(&self) -> usize {
+        self.regs.guest_regs.sepc
+    }
+
+    /// Set the value of the program counter (PC).
+    fn set_pc(&mut self, val: usize) {
+        self.regs.guest_regs.sepc = val;
     }
 }
 
