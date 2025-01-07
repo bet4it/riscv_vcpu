@@ -320,6 +320,7 @@ impl<H: AxVCpuHal> RISCVVCpu<H> {
                     access_flags: MappingFlags::empty(),
                 })
             }
+            Trap::Exception(Exception::Breakpoint) => Ok(AxVCpuExitReason::Breakpoint),
             _ => {
                 panic!(
                     "Unhandled trap: {:?}, sepc: {:#x}, stval: {:#x}",

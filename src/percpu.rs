@@ -45,7 +45,6 @@ unsafe fn setup_csrs() {
     // Delegate some synchronous exceptions.
     hedeleg::Hedeleg::from_bits(
         traps::exception::INST_ADDR_MISALIGN
-            | traps::exception::BREAKPOINT
             | traps::exception::ENV_CALL_FROM_U_OR_VU
             | traps::exception::INST_PAGE_FAULT
             | traps::exception::LOAD_PAGE_FAULT
