@@ -1,5 +1,5 @@
 use riscv::register::hstatus;
-use riscv::register::{htinst, htval, hvip, scause, sie, sstatus, stval};
+use riscv::register::{htinst, htval, hvip, scause, sie, sstatus, stval, vsatp};
 use rustsbi::{Forward, RustSBI};
 use sbi_spec::{hsm, legacy};
 
@@ -89,6 +89,10 @@ impl<H: AxVCpuHal> axvcpu::AxArchVCpu for RISCVVCpu<H> {
         Ok(())
     }
 
+    fn get_page_table_root(&mut self) -> GuestPhysAddr {
+        self.regs.page_table_root.into()
+    }
+
     fn run(&mut self) -> AxResult<AxVCpuExitReason> {
         unsafe {
             sstatus::clear_sie();
@@ -143,7 +147,11 @@ impl<H: AxVCpuHal> axvcpu::AxArchVCpu for RISCVVCpu<H> {
     /// Get one of the vCPU's general purpose register.
     fn get_gpr(&self, index: usize) -> usize {
         match index {
-            0..=31 => self.regs.guest_regs.gprs.reg(GprIndex::from_raw(index as u32).unwrap()),
+            0..=31 => self
+                .regs
+                .guest_regs
+                .gprs
+                .reg(GprIndex::from_raw(index as u32).unwrap()),
             _ => {
                 warn!(
                     "RISCVVCpu: Unsupported general purpose register index: {}",
@@ -193,6 +201,8 @@ impl<H: AxVCpuHal> RISCVVCpu<H> {
         self.regs.trap_csrs.stval = stval::read();
         self.regs.trap_csrs.htval = htval::read();
         self.regs.trap_csrs.htinst = htinst::read();
+
+        self.regs.page_table_root = vsatp::read().ppn() << 12;
 
         let scause = scause::read();
         use scause::{Exception, Interrupt, Trap};

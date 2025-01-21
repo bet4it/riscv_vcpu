@@ -193,4 +193,7 @@ pub struct VmCpuRegisters {
 
     // Read on VM exit.
     pub trap_csrs: VmCpuTrapState,
+
+    // Guest physical address of the page table root.
+    pub page_table_root: usize,
 }
